@@ -1,3 +1,4 @@
+import { AddProductForm } from '@/components/AddProductForm';
 import { Button } from '@/components/ui/button';
 import { Bell, LogIn, Rabbit, Shield } from 'lucide-react';
 import Image from 'next/image';
@@ -65,6 +66,7 @@ export default function Home() {
             prices drop. Save money effortlessly.
           </p>
           {/* Add Product Form */}
+          <AddProductForm user={user} />
 
           {/* Features */}
           {products.length === 0 && (
