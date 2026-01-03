@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import PriceChart from './PriceChart';
 
 export default function ProductCard({ product }) {
   const [deleting, setDeleting] = useState(false);
@@ -110,8 +111,7 @@ export default function ProductCard({ product }) {
       </CardContent>
       {showChart && (
         <CardFooter className='pt-0'>
-          {/* TODO */}
-          <p>showChart</p>
+          <PriceChart productId={product.id} />
         </CardFooter>
       )}
     </Card>
