@@ -15,10 +15,7 @@ export async function signOut() {
 
 export async function addProduct(formData) {
   const url = formData.get('url');
-
-  if (!url) {
-    return { error: 'URL is required' };
-  }
+  if (!url) return { error: 'URL is required' };
 
   try {
     const supabase = await createClient();
@@ -26,22 +23,8 @@ export async function addProduct(formData) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      return { error: 'Not authenticated' };
-    }
+    if (!user) return { error: 'Not authenticated' };
 
-    // Scrape product data with Firecrawl
-    const productData = await scrapeProduct(url);
-
-    if (!productData.productName || !productData.currentPrice) {
-      console.log(productData, 'productData');
-      return { error: 'Could not extract product information from this URL' };
-    }
-
-    const newPrice = parseFloat(productData.currentPrice);
-    const currency = productData.currencyCode || 'USD';
-
-    // Check if product exists to determine if it's an update
     const { data: existingProduct } = await supabase
       .from('products')
       .select('id, current_price')
@@ -49,55 +32,58 @@ export async function addProduct(formData) {
       .eq('url', url)
       .single();
 
-    const isUpdate = !!existingProduct;
+    if (existingProduct) {
+      if (error.code === '23505') {
+        return { error: 'Product already being tracked' };
+      }
+      throw error;
+    }
 
-    // Upsert product (insert or update based on user_id + url)
+    const productData = await scrapeProduct(url);
+    if (!productData.productName || !productData.currentPrice) {
+      return { error: 'Could not extract product information' };
+    }
+
+    const price = parseFloat(productData.currentPrice);
+    const currency = productData.currencyCode || 'USD';
+
+    // 1️⃣ INSERT product (fail if exists)
     const { data: product, error } = await supabase
       .from('products')
-      .upsert(
-        {
-          user_id: user.id,
-          url,
-          name: productData.productName,
-          current_price: newPrice,
-          currency: currency,
-          image_url: productData.productImageUrl,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'user_id,url', // Unique constraint on user_id + url
-          ignoreDuplicates: false, // Always update if exists
-        }
-      )
+      .insert({
+        user_id: user.id,
+        url,
+        name: productData.productName,
+        current_price: price,
+        currency,
+        image_url: productData.productImageUrl,
+      })
       .select()
       .single();
 
-    if (error) throw error;
-
-    // Add to price history if it's a new product OR price changed
-    const shouldAddHistory =
-      !isUpdate || existingProduct.current_price !== newPrice;
-
-    if (shouldAddHistory) {
-      await supabase.from('price_history').insert({
-        product_id: product.id,
-        price: newPrice,
-        currency: currency,
-      });
+    if (error) {
+      // Product already exists
+      if (error.code === '23505') {
+        return { error: 'Product already being tracked' };
+      }
+      throw error;
     }
+
+    // 2️⃣ ALWAYS insert initial price history
+    const result = await supabase.from('price_history').insert({
+      product_id: product.id,
+      price,
+      currency,
+    });
+    console.log('result', result, JSON.stringify(result));
+
     sendUpdateEmail('akshit07032001@gmail.com', 'New Product Tracked');
 
     revalidatePath('/');
-    return {
-      success: true,
-      product,
-      message: isUpdate
-        ? 'Product updated with latest price!'
-        : 'Product added successfully!',
-    };
-  } catch (error) {
-    console.error('Add product error:', error);
-    return { error: error.message || 'Failed to add product' };
+    return { success: true, product };
+  } catch (err) {
+    console.error(err);
+    return { error: 'Failed to add product' };
   }
 }
 
