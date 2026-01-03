@@ -2,7 +2,15 @@ import { AddProductForm } from '@/components/AddProductForm';
 import AuthButton from '@/components/AuthButton';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/utils/supabase/server';
-import { Bell, LogIn, Rabbit, Shield, TrendingDown } from 'lucide-react';
+import {
+  Bell,
+  Clock,
+  LogIn,
+  Mail,
+  Rabbit,
+  Shield,
+  TrendingDown,
+} from 'lucide-react';
 import Image from 'next/image';
 import { getProducts } from './actions';
 import ProductCard from '@/components/ProductCard';
@@ -18,20 +26,21 @@ export default async function Home() {
   const FEATURES = [
     {
       icon: Rabbit,
-      title: 'Lightning Fast',
+      title: 'Firecrawler Powered',
       description:
-        'Deal Drop extracts prices in seconds, handling JavaScript and dynamic content',
+        'Scrapes dynamic websites efficiently using our Firecrawler for accurate tracking.',
     },
     {
-      icon: Shield,
-      title: 'Always Reliable',
+      icon: Mail,
+      title: 'Email Alerts',
       description:
-        'Works across all major e-commerce sites with built-in anti-bot protection',
+        'Users receive instant email notifications when product prices drop.',
     },
     {
-      icon: Bell,
-      title: 'Smart Alerts',
-      description: 'Get notified instantly when prices drop below your target',
+      icon: Clock,
+      title: 'Daily Price Tracking',
+      description:
+        'Automated daily checks ensure you always have the latest price info.',
     },
   ];
 
