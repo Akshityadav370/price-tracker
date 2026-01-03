@@ -109,5 +109,5 @@ export async function POST(request) {
   }
 }
 
-// curl -X POST https://getdealdrop.vercel.app/api/cron/check-prices \
+// curl -X POST http://localhost:3000/api/cron/check-prices \
 //   -H "Authorization: Bearer cron_secret"

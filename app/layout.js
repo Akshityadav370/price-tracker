@@ -1,6 +1,6 @@
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import AuthListener from '@/components/AuthListener';
 
 export const metadata = {
   title: 'WatchMyPrice',
@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body>
         {children}
+        <AuthListener />
         <Toaster richColors />
       </body>
     </html>

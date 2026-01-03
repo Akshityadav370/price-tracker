@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { scrapeProduct } from '@/lib/firecrawl';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { sendUpdateEmail } from '@/lib/updateEmail';
 
 export async function signOut() {
   const supabase = await createClient();
@@ -84,6 +85,7 @@ export async function addProduct(formData) {
         currency: currency,
       });
     }
+    sendUpdateEmail('akshit07032001@gmail.com', 'New Product Tracked');
 
     revalidatePath('/');
     return {
