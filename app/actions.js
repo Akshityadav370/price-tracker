@@ -136,3 +136,6 @@ export async function getPriceHistory(productId) {
     return [];
   }
 }
+
+// Replace configuration url in Supabase authentication (Site URL) and cron job end point
+// add the new end point to .env
